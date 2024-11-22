@@ -32,7 +32,6 @@ import { RecaptchaV2 } from 'vue3-recaptcha-v2';
 
 const route = useRoute();
 const config = useRuntimeConfig();
-
 // UTM parameters
 const UtmValues = {
     utm_id: route.query?.utm_id,

@@ -7,6 +7,9 @@ import * as Yup from 'yup';
 
 const route = useRoute();
 const config = useRuntimeConfig();
+
+const recaptchaRef = ref(null);
+
 // UTM parameters
 const UtmValues = {
     utm_id: route.query?.utm_id,
@@ -30,13 +33,16 @@ const formSchema = Yup.object().shape({
     email: Yup.string().email('Invalid email').required('Email is required'),
     tel: Yup.string().required('Phone is required'),
     message: Yup.string().required('Message is required'),
-    recaptcha: Yup.string().required('reCaptcha validation is required'),
 });
 
 const onSubmit = async (e) => {
     // Add your form submission logic here
     e.preventDefault();
-    
+    const captchaResponse = recaptchaRef.value?.value;
+    if (!captchaResponse) {
+        console.error('Captcha is required');
+        return;
+    }
     try {
         const formData = new FormData(document.getElementById('myForm'));
         const formValues = Object.fromEntries(formData.entries());
@@ -94,7 +100,7 @@ onMounted(() => {
             <input type="hidden" :name="index" :value="utm" />
         </template>
         <!-- reCaptcha Hidden Field -->
-        <RecaptchaV2 />
+        <RecaptchaV2 ref="recaptchaRef" />
         <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
         <input type="hidden" name="g-recaptcha-version" value="v2">
         <div class="cta">

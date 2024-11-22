@@ -44,7 +44,7 @@ const UtmValues = {
 
 const targetURL = ref(`${config.public.HOSTNAME}${route.path}`);
 // const SITEKEY = '6LfzuIYqAAAAAA5cdWDhmrBONdXfOP2ZlKP7vTbZ'; // reCaptcha v3 site key
-const SITEKEY = '6LeowoYqAAAAAOcohG80sFTSfIH_OKbHzpjZn5na'; // reCaptcha v2 site key
+const SITEKEY = '6LfR4IYqAAAAAOLgXEXIN1ytBOeJsG3VexonPQ03'; // reCaptcha v2 site key
 const data = ref({
     note: 'Secure form. Your information is confidential with us.',
     submitBtnText: 'Review my case'

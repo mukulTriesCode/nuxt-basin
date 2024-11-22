@@ -1,6 +1,6 @@
 <template>
-    <form class="form" method="POST" name="Review_My_Case_Form"
-        ref="ReviewForm" action="https://usebasin.com/f/2d02e5938cc2">
+    <form id="myForm" class="form" method="POST" name="Review_My_Case_Form" ref="ReviewForm"
+        action="https://usebasin.com/f/2d02e5938cc2" data-basin-spam-protection='recaptcha'>
         <!-- Standard Form Fields -->
         <input name="name" type="text" placeholder="Names" />
         <input name="email" type="email" placeholder="Email" />
@@ -10,19 +10,24 @@
         <input name="pageURL" type="hidden" :value="targetURL" />
         <!-- Honeypot -->
         <input type="hidden" name="_gotcha">
-        <!-- UTM Parameters --> 
+        <!-- UTM Parameters -->
         <template v-for="(utm, index) in UtmValues" :key="index">
             <input type="hidden" :name="index" :value="utm" />
         </template>
         <!-- reCaptcha -->
+        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+        <input type="hidden" name="g-recaptcha-version" value="v3">
         <!-- <div class="g-recaptcha" ref="recaptchaRef" :data-sitekey="SITEKEY"></div> -->
         <div class="cta">
             <button type="submit" class="button button--black" ref="submitBtn">{{ data.submitBtnText }}</button>
         </div>
-    </Form>
+    </form>
 </template>
 <script setup>
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
+import { useRuntimeConfig } from 'nuxt/app';
+
 const route = useRoute();
 const config = useRuntimeConfig();
 const UtmValues = {
@@ -34,7 +39,7 @@ const UtmValues = {
     utm_term: route.query?.utm_term,
 };
 const targetURL = ref(`${config.public.HOSTNAME}${route.path}`);
-const SITEKEY = config.public.SITE_RECAPTCHA_KEY;
+const SITEKEY = '6LfzuIYqAAAAAA5cdWDhmrBONdXfOP2ZlKP7vTbZ';
 const ReviewForm = ref(null);
 const recaptchaRef = ref(null);
 const submitBtn = ref(null);
@@ -42,5 +47,21 @@ const recaptchaValidation = ref(false);
 const data = ref({
     note: 'Secure form. Your information is confidential with us.',
     submitBtnText: 'Review my case'
+});
+
+onMounted(() => {
+    const myForm = document.getElementById('myForm');
+    if (myForm) {
+        myForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            grecaptcha.ready(function () {
+                grecaptcha.execute(SITEKEY, { action: 'submit' }).then(function (token) {
+                    document.getElementById('g-recaptcha-response').value = token;
+                    myForm.submit();
+                });
+            });
+        });
+    }
 });
 </script>

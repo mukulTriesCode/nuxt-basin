@@ -39,6 +39,7 @@ const onSubmit = async (e) => {
     // Add your form submission logic here
     e.preventDefault();
     const captchaResponse = recaptchaRef.value?.value;
+    console.log('recaptchaRef', recaptchaRef)
     if (!captchaResponse) {
         console.error('Captcha is required');
         return;

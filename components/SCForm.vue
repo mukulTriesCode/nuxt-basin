@@ -1,6 +1,6 @@
 <template>
-    <form id="myForm" class="form" method="POST" name="Review_My_Case_Form" ref="ReviewForm"
-        action="https://usebasin.com/f/2d02e5938cc2" data-basin-spam-protection='recaptcha'>
+    <form id="myForm" @submit="onSubmit" class="form" method="POST" name="Review_My_Case_Form" ref="ReviewForm"
+        data-basin-spam-protection='recaptcha'>
         <!-- Standard Form Fields -->
         <input name="name" type="text" placeholder="Names" />
         <input name="email" type="email" placeholder="Email" />
@@ -15,6 +15,7 @@
             <input type="hidden" :name="index" :value="utm" />
         </template>
         <!-- reCaptcha Hidden Field -->
+        <RecaptchaV2 />
         <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
         <input type="hidden" name="g-recaptcha-version" value="v2">
         <div class="cta">
@@ -27,6 +28,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRuntimeConfig } from 'nuxt/app';
+import { RecaptchaV2 } from 'vue3-recaptcha-v2';
 
 const route = useRoute();
 const config = useRuntimeConfig();
@@ -48,6 +50,13 @@ const data = ref({
     note: 'Secure form. Your information is confidential with us.',
     submitBtnText: 'Review my case'
 });
+
+const onSubmit = () => {
+    // Add your form submission logic here
+    console.log('Form submitted successfully');
+    // Reset the form fields
+    //...
+}
 
 // Load reCaptcha script dynamically
 onMounted(() => {

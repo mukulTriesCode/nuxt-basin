@@ -10,11 +10,13 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@nuxtjs/recaptcha": "^1.1.2",
     "nuxt": "^3.14.1592",
     "vee-validate": "^4.14.7",
     "vue": "latest",
     "vue-recaptcha-v3": "^2.0.1",
     "vue-router": "latest",
+    "vue3-recaptcha-v2": "^2.1.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {

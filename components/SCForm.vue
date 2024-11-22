@@ -14,22 +14,24 @@
         <template v-for="(utm, index) in UtmValues" :key="index">
             <input type="hidden" :name="index" :value="utm" />
         </template>
-        <!-- reCaptcha -->
+        <!-- reCaptcha Hidden Field -->
         <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
         <input type="hidden" name="g-recaptcha-version" value="v3">
-        <!-- <div class="g-recaptcha" ref="recaptchaRef" :data-sitekey="SITEKEY"></div> -->
         <div class="cta">
             <button type="submit" class="button button--black" ref="submitBtn">{{ data.submitBtnText }}</button>
         </div>
     </form>
 </template>
+
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRuntimeConfig } from 'nuxt/app';
 
 const route = useRoute();
 const config = useRuntimeConfig();
+
+// UTM parameters
 const UtmValues = {
     utm_id: route.query?.utm_id,
     utm_source: route.query?.utm_source,
@@ -38,29 +40,50 @@ const UtmValues = {
     utm_content: route.query?.utm_content,
     utm_term: route.query?.utm_term,
 };
+
 const targetURL = ref(`${config.public.HOSTNAME}${route.path}`);
-const SITEKEY = '6LfzuIYqAAAAAA5cdWDhmrBONdXfOP2ZlKP7vTbZ';
-const ReviewForm = ref(null);
-const recaptchaRef = ref(null);
-const submitBtn = ref(null);
-const recaptchaValidation = ref(false);
+const SITEKEY = '6LfzuIYqAAAAAA5cdWDhmrBONdXfOP2ZlKP7vTbZ'; // reCaptcha v3 site key
 const data = ref({
     note: 'Secure form. Your information is confidential with us.',
     submitBtnText: 'Review my case'
 });
 
+// Load reCaptcha script dynamically
 onMounted(() => {
+    // Dynamically load reCaptcha script if not already loaded
+    if (typeof grecaptcha === 'undefined') {
+        const script = document.createElement('script');
+        script.src = `https://www.google.com/recaptcha/api.js?render=${SITEKEY}`;
+        script.async = true;
+        script.defer = true;
+        script.onload = () => {
+            console.log('reCaptcha script loaded successfully');
+        };
+        document.head.appendChild(script);
+    }
+
     const myForm = document.getElementById('myForm');
     if (myForm) {
         myForm.addEventListener('submit', function (event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent the default form submission
 
-            grecaptcha.ready(function () {
-                grecaptcha.execute(SITEKEY, { action: 'submit' }).then(function (token) {
-                    document.getElementById('g-recaptcha-response').value = token;
-                    myForm.submit();
+            // Ensure grecaptcha is ready before submitting the form
+            if (typeof grecaptcha !== 'undefined') {
+                grecaptcha.ready(function () {
+                    grecaptcha.execute(SITEKEY, { action: 'submit' }).then(function (token) {
+                        // Set the token in the hidden field
+                        document.getElementById('g-recaptcha-response').value = token;
+
+                        // Now submit the form
+                        myForm.submit();
+                    }).catch((err) => {
+                        console.error('reCaptcha error: ', err);
+                        // Handle the error (maybe show a message to the user)
+                    });
                 });
-            });
+            } else {
+                console.error('reCaptcha is not defined yet!');
+            }
         });
     }
 });

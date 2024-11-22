@@ -16,7 +16,7 @@
         </template>
         <!-- reCaptcha Hidden Field -->
         <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
-        <input type="hidden" name="g-recaptcha-version" value="v3">
+        <input type="hidden" name="g-recaptcha-version" value="v2">
         <div class="cta">
             <button type="submit" class="button button--black" ref="submitBtn">{{ data.submitBtnText }}</button>
         </div>

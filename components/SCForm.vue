@@ -1,8 +1,34 @@
+<template>
+    <div class="container">
+        <form id="myForm" @submit="onSubmit" class="form" method="POST" name="Review_My_Case_Form" ref="ReviewForm"
+            data-basin-spam-protection='recaptcha'>
+            <!-- Standard Form Fields -->
+            <input name="name" type="text" placeholder="Names" />
+            <input name="email" type="email" placeholder="Email" />
+            <input name="tel" type="tel" placeholder="Phone" />
+            <textarea name="message" placeholder="Message" />
+            <!-- Hidden Honeypot Field for Spam Prevention -->
+            <input name="pageURL" type="hidden" :value="targetURL" />
+            <!-- Honeypot -->
+            <input type="hidden" name="_gotcha">
+            <!-- UTM Parameters -->
+            <template v-for="(utm, index) in UtmValues" :key="index">
+                <input type="hidden" :name="index" :value="utm" />
+            </template>
+            <!-- reCaptcha Hidden Field -->
+            <div ref="recaptchaRef" class="g-recaptcha" data-sitekey="6Lew3SMUAAAAAJ82QoS7gqOTkRI_dhYrFy1f7Sqy"></div>
+            <div class="cta">
+                <button type="submit" class="button button--black" ref="submitBtn">{{ data.submitBtnText }}</button>
+            </div>
+        </form>
+    </div>
+</template>
+
+
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRuntimeConfig } from 'nuxt/app';
-import { RecaptchaV2 } from 'vue3-recaptcha-v2';
 import * as Yup from 'yup';
 
 const route = useRoute();
@@ -38,74 +64,80 @@ const formSchema = Yup.object().shape({
 const onSubmit = async (e) => {
     // Add your form submission logic here
     e.preventDefault();
-    const captchaResponse = recaptchaRef.value?.value;
-    console.log('recaptchaRef', recaptchaRef)
-    if (!captchaResponse) {
-        console.error('Captcha is required');
-        return;
-    }
-    try {
-        const formData = new FormData(document.getElementById('myForm'));
-        const formValues = Object.fromEntries(formData.entries());
-        const isValid = await formSchema.validate(formValues, { abortEarly: false });
-        if (!isValid) {
-            console.error('Form validation failed');
-            return;
+    const captchaResponse = recaptchaRef.value?.querySelector('textarea.g-recaptcha-response');
+    if (captchaResponse && captchaResponse.value) {
+
+        try {
+            const formData = new FormData(document.getElementById('myForm'));
+            const formValues = Object.fromEntries(formData.entries());
+            const isValid = await formSchema.validate(formValues, { abortEarly: false });
+            if (!isValid) {
+                console.error('Form validation failed');
+                return;
+            }
+            const response = await fetch('https://usebasin.com/f/2d02e5938cc2', {
+                method: 'POST',
+                body: formData,
+            });
+            if (!response.ok) {
+                throw new Error('Failed to submit form');
+            }
+            console.log('Form submitted successfully');
+            // Reset the form fields
+            document.getElementById('myForm').reset();
+        } catch (error) {
+            console.error('Error submitting form:', error);
         }
-        const response = await fetch('https://usebasin.com/f/2d02e5938cc2', {
-            method: 'POST',
-            body: formData,
-        });
-        if (!response.ok) {
-            throw new Error('Failed to submit form');
-        }
-        console.log('Form submitted successfully');
-        // Reset the form fields
-        document.getElementById('myForm').reset();
-    } catch (error) {
-        console.error('Error submitting form:', error);
+    } else {
+        console.log('captchaResponse is empty or does not exist, not submitting form');
+        console.log('captchaResponse.value', captchaResponse.value)
     }
 }
-
-// Load reCaptcha script dynamically
-onMounted(() => {
-    // Dynamically load reCaptcha script if not already loaded
-    if (typeof grecaptcha === 'undefined') {
-        const script = document.createElement('script');
-        script.src = `https://www.google.com/recaptcha/api.js?render=${SITEKEY}`;
-        script.async = true;
-        script.defer = true;
-        script.onload = () => {
-            console.log('reCaptcha script loaded successfully');
-        };
-        document.head.appendChild(script);
-    }
-});
 </script>
+<style lang="scss">
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+form {
+    background-color: #f2f2f2;
+    max-width: 350px;
+    padding: 50px;
+    margin: 0 auto;
 
+    .inputs {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
 
-<template>
-    <form id="myForm" @submit="onSubmit" class="form" method="POST" name="Review_My_Case_Form" ref="ReviewForm"
-        data-basin-spam-protection='recaptcha'>
-        <!-- Standard Form Fields -->
-        <input name="name" type="text" placeholder="Names" />
-        <input name="email" type="email" placeholder="Email" />
-        <input name="tel" type="tel" placeholder="Phone" />
-        <textarea name="message" placeholder="Message" />
-        <!-- Hidden Honeypot Field for Spam Prevention -->
-        <input name="pageURL" type="hidden" :value="targetURL" />
-        <!-- Honeypot -->
-        <input type="hidden" name="_gotcha">
-        <!-- UTM Parameters -->
-        <template v-for="(utm, index) in UtmValues" :key="index">
-            <input type="hidden" :name="index" :value="utm" />
-        </template>
-        <!-- reCaptcha Hidden Field -->
-        <RecaptchaV2 ref="recaptchaRef" />
-        <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
-        <input type="hidden" name="g-recaptcha-version" value="v2">
-        <div class="cta">
-            <button type="submit" class="button button--black" ref="submitBtn">{{ data.submitBtnText }}</button>
-        </div>
-    </form>
-</template>
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input,
+        textarea {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    }
+
+    input,
+    textarea,
+    button {
+        width: -webkit-fill-available;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .g-recaptcha {
+        margin-bottom: 10px;
+    }
+}
+</style>

@@ -20,39 +20,3 @@
     </form>
 </template>
 
-<style lang="scss">
-form {
-    background-color: #f2f2f2;
-    max-width: 350px;
-    padding: 50px;
-    margin: 0 auto;
-
-    .inputs {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        input,
-        textarea {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-    }
-
-    input,
-    textarea,
-    button {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-}
-</style>

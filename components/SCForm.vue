@@ -3,7 +3,7 @@
         <form id="myForm" @submit="onSubmit" class="form" method="POST" name="Review_My_Case_Form" ref="ReviewForm"
             data-basin-spam-protection='recaptcha'>
             <!-- Standard Form Fields -->
-            <input name="name" type="text" placeholder="Names" />
+            <input name="name" type="text" placeholder="Name" />
             <input name="email" type="email" placeholder="Email" />
             <input name="tel" type="tel" placeholder="Phone" />
             <textarea name="message" placeholder="Message" />
@@ -84,6 +84,8 @@ const onSubmit = async (e) => {
             }
             console.log('Form submitted successfully');
             // Reset the form fields
+            const redirectionURL = '/thank-you';
+            setTimeout(() => location.assign(redirectionURL), 100);
             document.getElementById('myForm').reset();
         } catch (error) {
             console.error('Error submitting form:', error);
